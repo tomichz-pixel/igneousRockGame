@@ -1,4 +1,4 @@
-<div id="rock-game" style="width:100%; max-width:900px; height:600px; margin:auto; font-family:sans-serif;">
+<div id="rock-game" style="width:100%; max-width:900px; margin:auto; font-family:sans-serif;">
 
 <style>
 #rock-game * { box-sizing:border-box; user-select:none; }
@@ -6,116 +6,85 @@
 #rock-game .header {
     height:48px; background:#444; color:#fff;
     display:flex; justify-content:space-between; align-items:center;
-    padding:0 12px; font-size:13px; border-radius:8px 8px 0 0;
+    padding:0 12px; font-size:13px; border-radius: 8px 8px 0 0;
 }
 
 #rock-game .board {
-    display:grid;
-    grid-template-rows: repeat(8, auto 1fr);
-    height: calc(600px - 48px);
-    background:#f0f0f0;
-    border:1px solid #ccc;
+    display:flex; flex-direction:column; background: #f0f0f0;
+    border: 1px solid #ccc; padding-bottom: 10px;
 }
 
 #rock-game .layer-label {
-    font-size:10px;
-    padding:2px 6px 0;
+    font-size: 11px; color: #666; padding: 4px 10px 0; font-weight: bold;
 }
 
 #rock-game .area {
-    display:grid;
-    grid-template-columns:repeat(6, 1fr);
-    gap:3px;
-    padding:3px;
+    display:grid; grid-template-columns:repeat(6, 1fr);
+    gap:4px; padding:6px; margin-bottom: 2px;
 }
 
-#rock-game .card {
-    width:100%;
-    aspect-ratio:1;
-    cursor:pointer;
+#rock-game .card { width:100%; cursor:pointer; }
+
+#rock-game .card-inner-wrapper {
+    position:relative; width:100%; padding-bottom:55%; /* 横長カード */
 }
 
 #rock-game .inner {
-    width:100%; height:100%;
-    position:relative;
-    transform-style:preserve-3d;
-    transition:0.3s;
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    transform-style:preserve-3d; transition:0.3s; border-radius:4px;
 }
 
 #rock-game .flipped .inner { transform:rotateY(180deg); }
 
 #rock-game .front, #rock-game .back {
-    position:absolute;
-    width:100%; height:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    padding:2px;
-    backface-visibility:hidden;
-    border-radius:4px;
-    font-weight:bold;
-    box-shadow:0 1px 2px rgba(0,0,0,0.2);
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    display:flex; justify-content:center; align-items:center;
+    text-align:center; padding:2px; backface-visibility:hidden;
+    -webkit-backface-visibility:hidden; border-radius:4px;
+    font-weight:bold; box-shadow:0 1px 3px rgba(0,0,0,0.2);
 }
 
-#rock-game .front {
-    background:#cfd8dc;
-    font-size:clamp(10px,2vw,14px);
-}
+#rock-game .front { background:#cfd8dc; color:#455a64; font-size: 14px; }
 
 #rock-game .back {
-    background:white;
-    transform:rotateY(180deg);
-    font-size:clamp(8px,1.6vw,12px);
+    background:white; transform:rotateY(180deg);
+    writing-mode: horizontal-tb; /* 横書き */
+    font-size: clamp(8px, 1.8vw, 12px); line-height: 1.2;
+    word-break: break-all;
 }
 
-#rock-game .layer-0 .back { border-left:3px solid #ef5350; }
-#rock-game .layer-1 .back { border-left:3px solid #42a5f5; }
-#rock-game .layer-2 .back { border-left:3px solid #66bb6a; }
-#rock-game .layer-3 .back { border-left:3px solid #ffa726; }
+/* 層ごとの色分け */
+#rock-game .layer-0 .back { border-bottom: 4px solid #ef5350; }
+#rock-game .layer-1 .back { border-bottom: 4px solid #42a5f5; }
+#rock-game .layer-2 .back { border-bottom: 4px solid #66bb6a; }
+#rock-game .layer-3 .back { border-bottom: 4px solid #ffa726; }
 
-#rock-game .is-lucky .back {
-    background:#fff9c4;
-    border:2px solid #fbc02d !important;
+#rock-game .is-lucky .back { 
+    background: #fff9c4; border: 2px solid #fbc02d !important; 
 }
 
-#rock-game .matched {
-    opacity:0;
-    transform:scale(0);
-    transition:0.4s;
-    pointer-events:none;
-}
+#rock-game .matched { opacity:0; transform:scale(0); transition:0.4s; pointer-events:none;}
 
 #rock-game .modal {
-    display:none; position:fixed; top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,0.7);
-    justify-content:center; align-items:center;
-    z-index:1000;
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index: 1000;
 }
 
 #rock-game .modal-content {
-    background:white; padding:20px;
-    border-radius:12px;
-    width:90%; max-width:400px;
+    background:white; padding:20px; border-radius:12px;
+    width:90%; max-width:400px; max-height: 80vh; overflow-y: auto;
 }
 
 #rock-game .analysis {
-    background:#f9f9f9;
-    padding:10px;
-    border-radius:6px;
-    font-size:13px;
-    margin:10px 0;
-    border-left:4px solid #ccc;
+    background: #f9f9f9; padding: 10px; border-radius: 6px;
+    font-size: 13px; margin: 10px 0; border-left: 4px solid #ccc;
 }
 
+#rock-game .analysis b { color: #d32f2f; }
+
 #rock-game button {
-    width:100%;
-    padding:12px;
-    background:#2196F3;
-    color:white;
-    border:none;
-    border-radius:6px;
+    width:100%; padding:12px; background:#2196F3; color:white;
+    border:none; border-radius:6px; font-size:16px; cursor: pointer;
 }
 </style>
 
@@ -128,7 +97,7 @@
 
 <div class="modal" id="rock-modal">
     <div class="modal-content">
-        <h2 id="rock-mt"></h2>
+        <h2 id="rock-mt" style="margin-top:0;"></h2>
         <div id="rock-txt"></div>
         <div id="rock-analysis" class="analysis"></div>
         <button id="rock-btn">次へ</button>
@@ -137,173 +106,168 @@
 
 <script>
 (function(){
+    const rockData = {
+        "流紋岩": { 分類: "火山岩", 速度: "急激", 場所: "地表付近", 組織: "斑状組織", 色: "白っぽい", 鉱物: ["石英", "長石", "黒雲母"], note: "マグマが地表で急に冷えた火山岩。白っぽく、粘り気が強い溶岩からできます。" },
+        "安山岩": { 分類: "火山岩", 速度: "急激", 場所: "地表付近", 組織: "斑状組織", 色: "灰色", 鉱物: ["長石", "カクセン石", "黒雲母", "輝石"], note: "日本で最も一般的な灰色の火山岩。斑晶と石基が混ざる斑状組織が特徴です。" },
+        "玄武岩": { 分類: "火山岩", 速度: "急激", 場所: "地表付近", 組織: "斑状組織", 色: "黒っぽい", 鉱物: ["長石", "輝石", "カクセン石"], note: "ドロドロ流れる粘り気の弱い溶岩からできる。富士山の溶岩はこの仲間です。" },
+        "花崗岩": { 分類: "深成岩", 速度: "ゆっくり", 場所: "地下深く", 組織: "等粒状組織", 色: "白っぽい", 鉱物: ["石英", "長石", "黒雲母"], note: "地下深くでじっくり固まった白い岩。御影石（みかげいし）として有名です。" },
+        "閃緑岩": { 分類: "深成岩", 速度: "ゆっくり", 場所: "地下深く", 組織: "等粒状組織", 色: "灰色", 鉱物: ["長石", "カクセン石", "黒雲母", "輝石"], note: "地下で固まった灰色の岩。黒いゴマのような鉱物が等粒状に混ざっています。" },
+        "斑れい岩": { 分類: "深成岩", 速度: "ゆっくり", 場所: "地下深く", 組織: "等粒状組織", 色: "黒っぽい", 鉱物: ["長石", "輝石", "カクセン石"], note: "地下深くで固まった黒い岩。有色鉱物が多くて重く、非常に硬いのが特徴。" }
+    };
 
-const rockData = {
-"流紋岩":{分類:"火山岩",速度:"急激",場所:"地表付近",組織:"斑状組織",色:"白っぽい",鉱物:["石英","長石","黒雲母"],note:"白っぽく粘り気の強い溶岩"},
-"安山岩":{分類:"火山岩",速度:"急激",場所:"地表付近",組織:"斑状組織",色:"灰色",鉱物:["長石","カクセン石","黒雲母","輝石"],note:"日本で最も一般的"},
-"玄武岩":{分類:"火山岩",速度:"急激",場所:"地表付近",組織:"斑状組織",色:"黒っぽい",鉱物:["長石","輝石","カクセン石"],note:"粘り気が弱い"},
-"花崗岩":{分類:"深成岩",速度:"ゆっくり",場所:"地下深く",組織:"等粒状組織",色:"白っぽい",鉱物:["石英","長石","黒雲母"],note:"御影石"},
-"閃緑岩":{分類:"深成岩",速度:"ゆっくり",場所:"地下深く",組織:"等粒状組織",色:"灰色",鉱物:["長石","カクセン石","黒雲母","輝石"],note:"灰色の深成岩"},
-"斑れい岩":{分類:"深成岩",速度:"ゆっくり",場所:"地下深く",組織:"等粒状組織",色:"黒っぽい",鉱物:["長石","輝石","カクセン石"],note:"黒くて重い"}
-};
+    const rockNames = Object.keys(rockData);
+    const attrTypes = ["分類", "速度", "場所", "組織", "色", "鉱物"];
+    const mineralPools = [
+        ["石英", "長石", "黒雲母", "カクセン石", "輝石", "カクセン石"],
+        ["長石", "石英", "黒雲母", "輝石", "輝石", "カクセン石"],
+        ["長石", "長石", "石英", "黒雲母", "カクセン石", "輝石"]
+    ];
 
-const rockNames = Object.keys(rockData);
-const attrTypes = ["分類","速度","場所","組織","色","鉱物"];
+    // selections[i] = { el, val, type } または null
+    let selections = [null, null, null, null];
+    let lock = false, miss = 0, matches = 0;
 
-let selections=[null,null,null,null];
-let lock=false, miss=0, matches=0;
+    const board = document.getElementById('rock-board');
+    const modal = document.getElementById('rock-modal');
+    const mt = document.getElementById('rock-mt');
+    const txt = document.getElementById('rock-txt');
+    const analysis = document.getElementById('rock-analysis');
+    const btn = document.getElementById('rock-btn');
 
-const board=document.getElementById('rock-board');
+    function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 
-function shuffle(a){return a.sort(()=>Math.random()-0.5);}
+    function getValidRocks(type, value) {
+        if (type === "鉱物" && value === "長石") return [...rockNames]; // 長石は全岩石に含まれる
+        return rockNames.filter(name => {
+            const data = rockData[name][type];
+            return Array.isArray(data) ? data.includes(value) : data === value;
+        });
+    }
 
-function getValidRocks(type,value){
-if(value==="長石") return [...rockNames];
-return rockNames.filter(n=>{
-const d=rockData[n][type];
-return Array.isArray(d)?d.includes(value):d===value;
-});
-}
+    function createCard(val, type, layerIdx) {
+        const c = document.createElement('div');
+        c.className = 'card';
+        if (type === "鉱物" && val === "長石") c.classList.add('is-lucky');
 
-function createCard(val,type,layerIdx){
-const c=document.createElement('div');
-c.className='card';
-if(val==="長石") c.classList.add('is-lucky');
+        c.innerHTML = `
+            <div class="card-inner-wrapper">
+                <div class="inner">
+                    <div class="front">?</div>
+                    <div class="back">${val}</div>
+                </div>
+            </div>
+        `;
 
-c.innerHTML=`
-<div class="inner">
-<div class="front">?</div>
-<div class="back">${val}</div>
-</div>`;
+        c.onclick = () => {
+            if (lock || c.classList.contains('flipped') || c.classList.contains('matched')) return;
 
-c.onclick=()=>{
-if(lock||c.classList.contains('flipped')||c.classList.contains('matched')) return;
+            // 同じ層の既存選択を解除
+            if (selections[layerIdx]) {
+                selections[layerIdx].el.classList.remove('flipped');
+                selections[layerIdx] = null;
+            }
 
-if(selections[layerIdx]) selections[layerIdx].classList.remove('flipped');
+            c.classList.add('flipped');
+            // ★ クリック時点で val と type を selections に記録（dataset不要）
+            selections[layerIdx] = { el: c, val: val, type: type };
 
-c.classList.add('flipped');
-selections[layerIdx]=c;
-c.dataset.val=val;
-c.dataset.type=type;
+            if (selections.every(s => s !== null)) {
+                lock = true;
+                setTimeout(checkMatch, 600);
+            }
+        };
+        return c;
+    }
 
-if(selections.every(s=>s!==null)){
-lock=true;
-setTimeout(checkMatch,400);
-}
-};
-return c;
-}
+    function checkMatch() {
+        // 全層の選択から、すべての条件を満たす岩石を絞り込む
+        let candidates = [...rockNames];
+        selections.forEach(s => {
+            const valid = getValidRocks(s.type, s.val);
+            candidates = candidates.filter(name => valid.includes(name));
+        });
 
-function checkMatch(){
-let candidates=[...rockNames];
+        if (candidates.length > 0) {
+            const rockName = candidates[0];
+            const res = rockData[rockName];
+            matches++;
+            showModal("正解！", `<b>【${rockName}】</b>の組み合わせです。<br><br>${res.note}`, "", true);
+        } else {
+            miss++;
+            document.getElementById('rock-m').textContent = miss;
 
-selections.forEach(s=>{
-const valid=getValidRocks(s.dataset.type,s.dataset.val);
-candidates=candidates.filter(n=>valid.includes(n));
-});
+            // 岩石名層があればそれを基準に、なければ最初の候補を表示
+            const rockSel = selections.find(s => s.type === "岩石名");
+            const target = rockSel ? rockSel.val : rockNames[0];
+            const correct = rockData[target];
 
-if(candidates.length===1){
-const name=candidates[0];
-const res=rockData[name];
-matches++;
+            let diffHtml = `<b>${target}</b> の正しい特徴：<br>`;
+            selections.forEach(s => {
+                if (s.type === "岩石名") return;
+                const isOk = getValidRocks(s.type, s.val).includes(target);
+                const correctVal = Array.isArray(correct[s.type]) ? correct[s.type].join("・") : correct[s.type];
+                diffHtml += `${s.type}: ${isOk ? '○ ' + s.val : '<b>× ' + s.val + '</b>'} (正: ${correctVal})<br>`;
+            });
 
-let analysisHtml=`<b>${name}</b> の特徴：<br>`;
-selections.forEach(s=>{
-if(s.dataset.type==="岩石名") return;
-let v=res[s.dataset.type];
-if(Array.isArray(v)) v=v.join("・");
-analysisHtml+=`${s.dataset.type}：○（${v}）<br>`;
-});
+            showModal("残念...", "正しい組み合わせではありませんでした。", diffHtml, false);
+        }
+    }
 
-showModal("正解！",
-`<b>${name}</b><br>${res.note}`,
-analysisHtml,true);
+    function showModal(title, message, analysisText, isSuccess) {
+        mt.textContent = title;
+        txt.innerHTML = message;
+        analysis.innerHTML = analysisText;
+        analysis.style.display = analysisText ? "block" : "none";
+        modal.style.display = 'flex';
 
-}else{
-miss++;
-document.getElementById('rock-m').textContent=miss;
+        btn.onclick = () => {
+            modal.style.display = 'none';
+            if (isSuccess) {
+                selections.forEach(s => s.el.classList.add('matched'));
+                if (matches === 6) {
+                    setTimeout(() => { alert("コンプリート！お疲れ様でした！"); init(); }, 500);
+                }
+            } else {
+                selections.forEach(s => s.el.classList.remove('flipped'));
+            }
+            selections = [null, null, null, null];
+            lock = false;
+        };
+    }
 
-const rockCard = selections.find(s=>s.dataset.type==="岩石名");
-const target = rockCard ? rockCard.dataset.val : rockNames[0];
-const correct = rockData[target];
+    function init() {
+        board.innerHTML = '';
+        miss = 0; matches = 0;
+        document.getElementById('rock-m').textContent = 0;
+        selections = [null, null, null, null];
 
-let diffHtml=`<b>${target}</b> の正しい特徴：<br>`;
+        const selectedAttrs = shuffle([...attrTypes]).slice(0, 3);
+        const layers = [...selectedAttrs, "岩石名"];
 
-selections.forEach(s=>{
-if(s.dataset.type==="岩石名") return;
+        layers.forEach((type, i) => {
+            const label = document.createElement('div');
+            label.className = 'layer-label';
+            label.textContent = `層 ${i+1}: ${type}`;
+            board.appendChild(label);
 
-const ok=getValidRocks(s.dataset.type,s.dataset.val).includes(target);
-let v=correct[s.dataset.type];
-if(Array.isArray(v)) v=v.join("・");
+            const area = document.createElement('div');
+            area.className = `area layer-${i}`;
 
-diffHtml+=`${s.dataset.type}：${ok?"○":`<b>× ${s.dataset.val}</b>`}（正：${v}）<br>`;
-});
+            let vals = [];
+            if (type === "鉱物") {
+                vals = shuffle([...mineralPools[Math.floor(Math.random()*mineralPools.length)]]);
+            } else if (type === "岩石名") {
+                vals = shuffle([...rockNames]);
+            } else {
+                vals = shuffle(rockNames.map(name => rockData[name][type]));
+            }
 
-showModal("残念…","不正解です",diffHtml,false);
-}
-}
+            vals.forEach(v => area.appendChild(createCard(v, type, i)));
+            board.appendChild(area);
+        });
+    }
 
-function showModal(title,msg,analysis,isSuccess){
-const modal=document.getElementById('rock-modal');
-document.getElementById('rock-mt').textContent=title;
-document.getElementById('rock-txt').innerHTML=msg;
-
-const a=document.getElementById('rock-analysis');
-a.innerHTML=analysis;
-a.style.display=analysis?"block":"none";
-
-modal.style.display='flex';
-
-document.getElementById('rock-btn').onclick=()=>{
-modal.style.display='none';
-
-if(isSuccess){
-selections.forEach(s=>s.classList.add('matched'));
-}else{
-selections.forEach(s=>s.classList.remove('flipped'));
-}
-
-selections=[null,null,null,null];
-lock=false;
-};
-}
-
-function init(){
-board.innerHTML='';
-miss=0; matches=0;
-document.getElementById('rock-m').textContent=0;
-
-const layers=[...shuffle([...attrTypes]).slice(0,3),"岩石名"];
-
-layers.forEach((type,i)=>{
-const label=document.createElement('div');
-label.className='layer-label';
-label.textContent=`層${i+1}:${type}`;
-board.appendChild(label);
-
-const area=document.createElement('div');
-area.className=`area layer-${i}`;
-
-let vals=[];
-if(type==="岩石名"){
-vals=shuffle([...rockNames]);
-}else if(type==="鉱物"){
-vals=shuffle(["石英","長石","黒雲母","輝石","カクセン石","長石"]);
-}else{
-vals=shuffle([...new Set(rockNames.map(n=>rockData[n][type]))]);
-}
-
-vals.forEach(v=>area.appendChild(createCard(v,type,i)));
-board.appendChild(area);
-});
-}
-
-init();
-
+    init();
 })();
 </script>
 </div>
-
-
-ここまで来てると、もう「教材として使えるレベル」です。
-次にやるなら「理解を加速させるUI」に入る段階ですね。
