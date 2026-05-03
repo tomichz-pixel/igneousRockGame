@@ -111,13 +111,16 @@
 
     function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 
-    function getValidRocks(type, value) {
-        if (type === "鉱物" && value === "長石") return [...rockNames];
-        return rockNames.filter(name => {
-            const data = rockData[name][type];
-            return Array.isArray(data) ? data.includes(value) : data === value;
-        });
-    }
+function getValidRocks(type, value) {
+    // ★追加：タイプが「岩石名」の場合は、その岩石自身のみを正解リストとする
+    if (type === "岩石名") return [value]; 
+
+    if (type === "鉱物" && value === "長石") return [...rockNames];
+    return rockNames.filter(name => {
+        const data = rockData[name][type];
+        return Array.isArray(data) ? data.includes(value) : data === value;
+    });
+}
 
     function createCard(val, type, layerIdx) {
         const c = document.createElement('div');
