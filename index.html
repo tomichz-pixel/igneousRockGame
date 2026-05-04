@@ -82,25 +82,59 @@
 <script>
 (function(){
     const rockData = {
-        "流紋岩": { 分類:"火山岩", 速度:"急激", 場所:"地表付近", 組織:"斑状組織", 色:"白っぽい", 鉱物:["石英","長石","黒雲母"], note:"マグマが地表で急に冷えた火山岩。白っぽく、粘り気が強い溶岩からできます。" },
-        "安山岩": { 分類:"火山岩", 速度:"急激", 場所:"地表付近", 組織:"斑状組織", 色:"灰色",   鉱物:["長石","カクセン石","黒雲母","輝石"], note:"日本で最も一般的な灰色の火山岩。斑晶と石基が混ざる斑状組織が特徴です。" },
-        "玄武岩": { 分類:"火山岩", 速度:"急激", 場所:"地表付近", 組織:"斑状組織", 色:"黒っぽい", 鉱物:["長石","輝石","カクセン石"], note:"ドロドロ流れる粘り気の弱い溶岩からできる。富士山の溶岩はこの仲間です。" },
-        "花崗岩": { 分類:"深成岩", 速度:"ゆっくり", 場所:"地下深く", 組織:"等粒状組織", 色:"白っぽい", 鉱物:["石英","長石","黒雲母"], note:"地下深くでじっくり固まった白い岩。御影石（みかげいし）として有名です。" },
-        "閃緑岩": { 分類:"深成岩", 速度:"ゆっくり", 場所:"地下深く", 組織:"等粒状組織", 色:"灰色",   鉱物:["長石","カクセン石","黒雲母","輝石"], note:"地下で固まった灰色の岩。黒いゴマのような鉱物が等粒状に混ざっています。" },
-        "斑れい岩": { 分類:"深成岩", 速度:"ゆっくり", 場所:"地下深く", 組織:"等粒状組織", 色:"黒っぽい", 鉱物:["長石","輝石","カクセン石"], note:"地下深くで固まった黒い岩。有色鉱物が多くて重く、非常に硬いのが特徴。" }
+        "流紋岩": {
+            分類:"火山岩", 速度:"急激", 場所:"地表付近",
+            組織:"斑状組織", 色:"白っぽい",
+            鉱物:["石英","長石","黒雲母"],
+            note:"マグマが地表で急に冷えた火山岩。白っぽく、粘り気が強い溶岩からできます。"
+        },
+        "安山岩": {
+            分類:"火山岩", 速度:"急激", 場所:"地表付近",
+            組織:"斑状組織", 色:"灰色",
+            鉱物:["長石","角閃石","黒雲母","輝石"],
+            note:"日本で最も一般的な灰色の火山岩。斑晶と石基が混ざる斑状組織が特徴です。"
+        },
+        "玄武岩": {
+            分類:"火山岩", 速度:"急激", 場所:"地表付近",
+            組織:"斑状組織", 色:"黒っぽい",
+            鉱物:["長石","輝石","カンラン石"],
+            note:"ドロドロ流れる粘り気の弱い溶岩からできる。富士山の溶岩はこの仲間です。"
+        },
+        "花崗岩": {
+            分類:"深成岩", 速度:"ゆっくり", 場所:"地下深く",
+            組織:"等粒状組織", 色:"白っぽい",
+            鉱物:["石英","長石","黒雲母"],
+            note:"地下深くでじっくり固まった白い岩。御影石（みかげいし）として有名です。"
+        },
+        "閃緑岩": {
+            分類:"深成岩", 速度:"ゆっくり", 場所:"地下深く",
+            組織:"等粒状組織", 色:"灰色",
+            鉱物:["長石","角閃石","黒雲母","輝石"],
+            note:"地下で固まった灰色の岩。黒いゴマのような鉱物が等粒状に混ざっています。"
+        },
+        "斑れい岩": {
+            分類:"深成岩", 速度:"ゆっくり", 場所:"地下深く",
+            組織:"等粒状組織", 色:"黒っぽい",
+            鉱物:["長石","輝石","カンラン石"],
+            note:"地下深くで固まった黒い岩。有色鉱物が多くて重く、非常に硬いのが特徴。"
+        }
     };
+
+    const mineralPools = [
+        // バランス型（基本パターン）
+        ["石英","長石","黒雲母","角閃石","輝石","カンラン石"],
+        // やや簡単（石英＋黒雲母寄せ）
+        ["石英","長石","黒雲母","黒雲母","角閃石","カンラン石"],
+        // 苦鉄質寄り（後半やや悩む）
+        ["長石","輝石","輝石","角閃石","カンラン石","石英"]
+    ];
 
     const rockNames = Object.keys(rockData);
     const attrTypes = ["分類","速度","場所","組織","色","鉱物"];
-    const mineralPools = [
-        ["石英","長石","黒雲母","カクセン石","輝石","カクセン石"],
-        ["長石","石英","黒雲母","輝石","輝石","カクセン石"],
-        ["長石","長石","石英","黒雲母","カクセン石","輝石"]
-    ];
 
     let selections = [null, null, null, null];
     let lock = false, miss = 0;
-    let matchedRocks = new Set(); // ★ 正解済み岩石を管理
+    let matchedRocks = new Set();
 
     const board  = document.getElementById('rock-board');
     const modal  = document.getElementById('rock-modal');
@@ -111,27 +145,29 @@
 
     function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 
-function getValidRocks(type, value) {
-    // ★追加：タイプが「岩石名」の場合は、その岩石自身のみを正解リストとする
-    if (type === "岩石名") return [value]; 
-
-    if (type === "鉱物" && value === "長石") return [...rockNames];
-    return rockNames.filter(name => {
-        const data = rockData[name][type];
-        return Array.isArray(data) ? data.includes(value) : data === value;
-    });
-}
+    function getValidRocks(type, value) {
+        if (type === "岩石名") return [value];
+        if (type === "鉱物" && value === "長石") return [...rockNames];
+        return rockNames.filter(name => {
+            const data = rockData[name][type];
+            return Array.isArray(data) ? data.includes(value) : data === value;
+        });
+    }
 
     function createCard(val, type, layerIdx) {
         const c = document.createElement('div');
         c.className = 'card';
+        
+        c.dataset.val = val;
+        c.dataset.type = type;
+
         if (type === "鉱物" && val === "長石") c.classList.add('is-lucky');
 
         c.innerHTML = `
             <div class="card-inner-wrapper">
                 <div class="inner">
                     <div class="front">?</div>
-                    <div class="back">${val}</div>
+                    <div class="back"><span class="back-text">${val}</span></div>
                 </div>
             </div>`;
 
@@ -141,7 +177,10 @@ function getValidRocks(type, value) {
                 selections[layerIdx].el.classList.remove('flipped');
             }
             c.classList.add('flipped');
-            selections[layerIdx] = { el: c, val, type };
+            
+            const currentVal = c.dataset.val;
+            selections[layerIdx] = { el: c, val: currentVal, type };
+            
             if (selections.every(s => s !== null)) {
                 lock = true;
                 setTimeout(checkMatch, 600);
@@ -151,21 +190,19 @@ function getValidRocks(type, value) {
     }
 
     function checkMatch() {
-        // 全層の条件を満たす岩石を絞り込む
         let candidates = [...rockNames];
         selections.forEach(s => {
             const valid = getValidRocks(s.type, s.val);
             candidates = candidates.filter(name => valid.includes(name));
         });
 
-        // ★ まだ正解していない岩石だけに絞る
         const freshCandidates = candidates.filter(name => !matchedRocks.has(name));
 
         if (freshCandidates.length > 0) {
-            // 正解：freshCandidates の先頭を「今回正解した岩石」として確定
             const rockName = freshCandidates[0];
             matchedRocks.add(rockName);
             const res = rockData[rockName];
+            
             showModal(
                 "正解！",
                 `<b>【${rockName}】</b>の組み合わせです。<br><br>${res.note}`,
@@ -177,10 +214,8 @@ function getValidRocks(type, value) {
             miss++;
             document.getElementById('rock-m').textContent = miss;
 
-            // 不正解の解説：岩石名層があればそれを基準に、なければ全候補を列挙
             let diffHtml = "";
             if (candidates.length === 0) {
-                // どの岩石にも合致しない
                 diffHtml = "選んだカードはどの岩石の組み合わせにも当てはまりません。<br>";
                 const rockSel = selections.find(s => s.type === "岩石名");
                 if (rockSel) {
@@ -195,7 +230,6 @@ function getValidRocks(type, value) {
                     });
                 }
             } else {
-                // 属性は合うが全員すでに正解済み
                 diffHtml = `この組み合わせに合う岩石（${candidates.join("・")}）はすでに正解済みです。<br>別の岩石名と組み合わせてください。`;
             }
 
@@ -214,7 +248,33 @@ function getValidRocks(type, value) {
             modal.style.display = 'none';
             if (isSuccess) {
                 selections.forEach(s => s.el.classList.add('matched'));
-                // ★ クリア判定を matchedRocks.size で行う
+                
+                // 残り2石になったら鉱物を逆算してすり替える処理
+                if (matchedRocks.size === rockNames.length - 2) {
+                    const remainingRocks = rockNames.filter(name => !matchedRocks.has(name));
+                    const remainingCards = Array.from(document.querySelectorAll('#rock-board .card:not(.matched)'))
+                                                .filter(c => c.dataset.type === "鉱物");
+
+                    if (remainingCards.length === 2) {
+                        const mineralsA = rockData[remainingRocks[0]]["鉱物"];
+                        const mineralsB = rockData[remainingRocks[1]]["鉱物"];
+
+                        const magicMineralA = mineralsA[Math.floor(Math.random() * mineralsA.length)];
+                        const magicMineralB = mineralsB[Math.floor(Math.random() * mineralsB.length)];
+
+                        remainingCards[0].dataset.val = magicMineralA;
+                        remainingCards[0].querySelector('.back-text').textContent = magicMineralA;
+
+                        remainingCards[1].dataset.val = magicMineralB;
+                        remainingCards[1].querySelector('.back-text').textContent = magicMineralB;
+
+                        remainingCards.forEach(card => {
+                            if (card.dataset.val === "長石") card.classList.add('is-lucky');
+                            else card.classList.remove('is-lucky');
+                        });
+                    }
+                }
+
                 if (matchedRocks.size === rockNames.length) {
                     setTimeout(() => { alert("コンプリート！お疲れ様でした！"); init(); }, 500);
                 }
@@ -229,7 +289,7 @@ function getValidRocks(type, value) {
     function init() {
         board.innerHTML = '';
         miss = 0;
-        matchedRocks = new Set(); // ★ リセット
+        matchedRocks = new Set();
         document.getElementById('rock-m').textContent = 0;
         selections = [null, null, null, null];
 
